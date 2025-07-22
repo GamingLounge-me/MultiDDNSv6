@@ -1,0 +1,44 @@
+{
+    "period": "1m",
+    "services": [
+        {
+            "name": "service1",
+            "update_url": "https://kunden.aditsystems.de/liveconfig/hosting/dnsupdate?hostname=<fqdn>&myip6=<ipv6>",
+            "auth_type": "http_basic",
+            "username": "your_username",
+            "password": "your_password"
+        },
+        {
+            "name": "service2",
+            "update_url": "https://another-provider.com/update?domain=<fqdn>&ipv6=<ipv6>",
+            "username": "other_username",
+            "password": "other_password"
+        },
+        {
+            "name": "oneService",
+            "update_url": "https://single-provider.com/dyndns?host=<fqdn>&ipv6addr=<ipv6>",
+            "username": "single_username",
+            "password": "single_password"
+        }
+    ],
+    "domain": [
+        {
+            "fqdn": "legion.gaminglounge.me",
+            "ipv6suffix": "::1111:2222:3333:4444",
+            "services": [
+                "service1",
+                "service2"
+            ]
+        },
+        {
+            "fqdn": "desktop.gaminglounge.me",
+            "ipv6suffix": "::5555:6666:7777:8888",
+            "services": "oneService"
+        },
+        {
+            "fqdn": "server.gaminglounge.me",
+            "ipv6suffix": "::aaaa:bbbb:cccc:dddd",
+            "services": "all"
+        }
+    ]
+}
