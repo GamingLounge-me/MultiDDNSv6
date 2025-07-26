@@ -119,6 +119,8 @@ func (c *DynDNSClient) getIPv6Prefix() (string, error) {
 		return "", fmt.Errorf("failed to get interfaces: %w", err)
 	}
 
+	var candidateIPs []net.IP
+
 	for _, iface := range interfaces {
 		// Skip loopback and down interfaces
 		if iface.Flags&net.FlagLoopback != 0 || iface.Flags&net.FlagUp == 0 {
@@ -135,12 +137,17 @@ func (c *DynDNSClient) getIPv6Prefix() (string, error) {
 				ip := ipnet.IP
 				// Look for global unicast IPv6 addresses
 				if ip.To4() == nil && ip.IsGlobalUnicast() && !ip.IsLinkLocalUnicast() {
-					// Extract the /64 prefix
-					prefix := ip.Mask(net.CIDRMask(64, 128))
-					return prefix.String(), nil
+					candidateIPs = append(candidateIPs, ip)
 				}
 			}
 		}
+	}
+
+	// If we found any IPv6 addresses, use the last one (newest)
+	if len(candidateIPs) > 0 {
+		lastIP := candidateIPs[len(candidateIPs)-1]
+		prefix := lastIP.Mask(net.CIDRMask(64, 128))
+		return prefix.String(), nil
 	}
 
 	return "", fmt.Errorf("no suitable IPv6 address found")
