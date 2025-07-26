@@ -40,5 +40,11 @@
             "ipv6suffix": "::aaaa:bbbb:cccc:dddd",
             "services": "all"
         }
+    ],
+    "blacklist": [
+        "fd00::",
+        "2001:db8::",
+        "fe80::",
+        "your_lua_prefix"
     ]
 }
