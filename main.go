@@ -112,7 +112,9 @@ func loadConfig(path string) (Config, error) {
 	}
 
 	return config, nil
-} // getIPv6Prefix detects the current IPv6 prefix
+}
+
+// getIPv6Prefix detects the current IPv6 prefix
 func (c *DynDNSClient) getIPv6Prefix() (string, error) {
 	interfaces, err := net.Interfaces()
 	if err != nil {
@@ -136,7 +138,7 @@ func (c *DynDNSClient) getIPv6Prefix() (string, error) {
 			if ipnet, ok := addr.(*net.IPNet); ok {
 				ip := ipnet.IP
 				// Look for global unicast IPv6 addresses
-				if ip.To4() == nil && ip.IsGlobalUnicast() && !ip.IsLinkLocalUnicast() {
+				if ip.To4() == nil && ip.IsGlobalUnicast() && !ip.IsLinkLocalUnicast() && !ip.IsPrivate() {
 					candidateIPs = append(candidateIPs, ip)
 				}
 			}
