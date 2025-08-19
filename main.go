@@ -13,6 +13,8 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/vishvananda/netlink"
 )
 
 // Service represents a DNS update service provider
@@ -33,9 +35,10 @@ type Domain struct {
 
 // Config represents the application configuration
 type Config struct {
-	Period   string    `json:"period"`
-	Services []Service `json:"services"`
-	Domains  []Domain  `json:"domain"`
+	Period    string    `json:"period"`
+	Services  []Service `json:"services"`
+	Domains   []Domain  `json:"domain"`
+	Blacklist []string  `json:"blacklist,omitempty"` // Add this line
 }
 
 // setupLogging configures standard logging
@@ -116,24 +119,18 @@ func loadConfig(path string) (Config, error) {
 
 // getIPv6Prefix detects the current IPv6 prefix
 func (c *DynDNSClient) getIPv6Prefix() (string, error) {
-	interfaces, err := net.Interfaces()
+	links, err := netlink.LinkList()
 	if err != nil {
-		return "", fmt.Errorf("failed to get interfaces: %w", err)
+		return "", fmt.Errorf("failed to get netlink interfaces: %w", err)
 	}
 
 	var candidateIPs []net.IP
 
-	for _, iface := range interfaces {
-		// Skip loopback and down interfaces
-		if iface.Flags&net.FlagLoopback != 0 || iface.Flags&net.FlagUp == 0 {
-			continue
-		}
-
-		addrs, err := iface.Addrs()
+	for _, link := range links {
+		addrs, err := netlink.AddrList(link, syscall.AF_INET6)
 		if err != nil {
 			continue
 		}
-
 		for _, addr := range addrs {
 			if ipnet, ok := addr.(*net.IPNet); ok {
 				ip := ipnet.IP
@@ -145,7 +142,6 @@ func (c *DynDNSClient) getIPv6Prefix() (string, error) {
 		}
 	}
 
-	// If we found any IPv6 addresses, use the last one (newest)
 	if len(candidateIPs) > 0 {
 		lastIP := candidateIPs[len(candidateIPs)-1]
 		prefix := lastIP.Mask(net.CIDRMask(64, 128))
@@ -251,6 +247,14 @@ func (c *DynDNSClient) checkAndUpdate() error {
 	prefix, err := c.getIPv6Prefix()
 	if err != nil {
 		return fmt.Errorf("failed to get IPv6 prefix: %w", err)
+	}
+
+	// Check blacklist
+	for _, blocked := range c.config.Blacklist {
+		if prefix == blocked {
+			log.Printf("IPv6 prefix %s is blacklisted, skipping update", prefix)
+			return nil
+		}
 	}
 
 	// Check if prefix has changed
