@@ -42,9 +42,7 @@
         }
     ],
     "blacklist": [
-        "fd00::",
         "2001:db8::",
-        "fe80::",
-        "your_lua_prefix"
+        "2001:43fw::"
     ]
 }
