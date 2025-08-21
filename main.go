@@ -132,7 +132,7 @@ func (c *DynDNSClient) getIPv6Prefix() (string, error) {
 		for _, addr := range addrs {
 			ip := addr.IP
 			// Only global unicast
-			if ip.IsGlobalUnicast() && !ip.IsLinkLocalUnicast() {
+			if ip.IsGlobalUnicast() && !ip.IsLinkLocalUnicast() && !ip.IsPrivate() {
 				// Check for deprecated flag (IFA_F_DEPRECATED = 0x20)
 				isDeprecated := addr.Flags&0x20 != 0
 				if isDeprecated {
