@@ -279,7 +279,7 @@ func main() {
 	// Parse check interval
 	checkInterval, err := time.ParseDuration(config.Period)
 	if err != nil {
-		log.Fatalf("Invalid period format: %v", err)
+		log.Fatalf("Invalid period format %q: %v", config.Period, err)
 	}
 
 	// Use standard logging to stderr
