@@ -20,7 +20,7 @@ WantedBy=multi-user.target
 ```
 
 ## Build
-Adjust the Enviromentvariables to you needs
+Adjust the environment variables to you needs
 ```
 GOARCH=amd64
 GOOS=linux
