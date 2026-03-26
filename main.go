@@ -273,7 +273,7 @@ func main() {
 	// Load configuration
 	config, err := loadConfig(configPath)
 	if err != nil {
-		log.Fatalf("Failed to load config: %v", err)
+		log.Fatalf("Failed to load config from %q: %v", configPath, err)
 	}
 
 	// Parse check interval
