@@ -1,6 +1,6 @@
 # MultiDDNSv6
 
-Program that gets IPv6 prefix from machine and checks if it has changes, then updates DNS-Entries at Services with FQDNs and Ipv6-Suffixes from the config.
+Program that gets the IPv6 prefix from the machine and checks if it has changed, then updates DNS records via service providers with FQDNs and IPv6 suffixes from the config.
 
 ## Use as Service
 
