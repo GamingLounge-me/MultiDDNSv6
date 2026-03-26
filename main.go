@@ -222,6 +222,11 @@ func (c *DynDNSClient) checkAndUpdate() error {
 		return fmt.Errorf("failed to get IPv6 prefix: %w", err)
 	}
 
+	// Check if prefix has changed
+	if prefix == c.currentPrefix {
+		return nil
+	}
+
 	// Log prefix change (avoid logging on first run when currentPrefix is empty)
 	if c.currentPrefix == "" {
 		log.Printf("Initial IPv6 prefix detected: %s", prefix)
