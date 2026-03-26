@@ -28,8 +28,12 @@ GOOS=linux
 
 ### Examples
 
-#### Build on Windows to be executed on Linux
-`set GOOS=linux;set GOARCH=amd64;go build -o multiddnsv6`
+#### Build on Windows(Poweshell) to be executed on Linux
+```powershell
+$env:GOOS = "linux"
+$env:GOARCH = "amd64"
+go build -o mddns6
+```
 
 ## Future & Support & Contribution
 We are planning to use (and support) these scripts as long as needed. We will gladly read (and most likely accept) PRs for patches, improvements and updates.
