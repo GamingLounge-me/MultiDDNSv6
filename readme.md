@@ -38,5 +38,5 @@ go build -o mddns6
 ## Future & Support & Contribution
 We are planning to use (and support) these scripts as long as needed. We will gladly read (and most likely accept) PRs for patches, improvements and updates.
 
-## Lizenz
+## License
 Shall be used under [GPLv3](https://github.com/GamingLounge-me/MultiDDNSv6/blob/main/LICENSE).
