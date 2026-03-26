@@ -222,20 +222,6 @@ func (c *DynDNSClient) checkAndUpdate() error {
 		return fmt.Errorf("failed to get IPv6 prefix: %w", err)
 	}
 
-	// Check blacklist
-	for _, blocked := range c.config.Blacklist {
-		if prefix == blocked {
-			log.Printf("IPv6 prefix %s is blacklisted, skipping update", prefix)
-			return nil
-		}
-	}
-
-	// Check if prefix has changed
-	if prefix == c.currentPrefix {
-		log.Printf("IPv6 prefix unchanged: %s", prefix)
-		return nil
-	}
-
 	// Log prefix change (avoid logging on first run when currentPrefix is empty)
 	if c.currentPrefix == "" {
 		log.Printf("Initial IPv6 prefix detected: %s", prefix)
