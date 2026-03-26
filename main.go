@@ -279,7 +279,6 @@ func main() {
 
 	// Use standard logging to stdout/stderr
 	log.SetFlags(log.LstdFlags)
-	log.Printf("Initialized MultiDDNSv6 logging")
 
 	client := &DynDNSClient{
 		config: config,
