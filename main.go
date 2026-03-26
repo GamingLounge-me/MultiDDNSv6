@@ -292,13 +292,13 @@ func main() {
 	log.Printf("Starting MultiDDNSv6 client:\n - Config: %s\n - Domains: %d\n - Services: %d\n - Check interval: %v", configPath, len(client.config.Domains), len(client.config.Services), client.checkInterval)
 
 	// Initial check
-	err := c.checkAndUpdate()
+	err = client.checkAndUpdate()
 	if err != nil {
 		log.Printf("Initial check failed: %v", err)
 	}
 
 	// Set up periodic checks
-	ticker := time.NewTicker(c.checkInterval)
+	ticker := time.NewTicker(client.checkInterval)
 	defer ticker.Stop()
 
 	// Set up signal handling for graceful shutdown
@@ -308,7 +308,7 @@ func main() {
 	for {
 		select {
 		case <-ticker.C:
-			err := c.checkAndUpdate()
+			err := client.checkAndUpdate()
 			if err != nil {
 				log.Printf("Check failed: %v", err)
 			}
@@ -317,18 +317,4 @@ func main() {
 			return
 		}
 	}
-}
-
-func main() {
-	configPath := "config.json"
-	if len(os.Args) > 1 {
-		configPath = os.Args[1]
-	}
-
-	client, err := NewDynDNSClient(configPath)
-	if err != nil {
-		log.Fatalf("Failed to create DynDNS client: %v", err)
-	}
-
-	client.Run()
 }
