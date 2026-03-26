@@ -28,7 +28,7 @@ GOOS=linux
 
 ### Examples
 
-#### Build on Windows(Poweshell) to be executed on Linux
+#### Build on Windows(PowerShell) to be executed on Linux
 ```powershell
 $env:GOOS = "linux"
 $env:GOARCH = "amd64"
