@@ -282,7 +282,7 @@ func main() {
 		log.Fatalf("Invalid period format: %v", err)
 	}
 
-	// Use standard logging to stdout/stderr
+	// Use standard logging to stderr
 	log.SetFlags(log.LstdFlags)
 
 	client := &DynDNSClient{
