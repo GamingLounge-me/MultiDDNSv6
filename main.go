@@ -41,51 +41,12 @@ type Config struct {
 	Blacklist []string  `json:"blacklist,omitempty"` // Add this line
 }
 
-// setupLogging configures standard logging
-func setupLogging() error {
-	// Use standard logging to stdout/stderr
-	log.SetFlags(log.LstdFlags)
-	log.Printf("MultiDDNSv6 logging initialized")
-	return nil
-}
-
 // DynDNSClient manages DNS updates for multiple domains
 type DynDNSClient struct {
 	config        Config
 	currentPrefix string
 	httpClient    *http.Client
 	checkInterval time.Duration
-}
-
-// NewDynDNSClient creates a new DynDNS client
-func NewDynDNSClient(configPath string) (*DynDNSClient, error) {
-	config, err := loadConfig(configPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to load config: %w", err)
-	}
-
-	// Parse check interval
-	checkInterval, err := time.ParseDuration(config.Period)
-	if err != nil {
-		return nil, fmt.Errorf("invalid period format: %w", err)
-	}
-
-	// Setup logging
-	err = setupLogging()
-	if err != nil {
-		return nil, fmt.Errorf("failed to setup logging: %w", err)
-	}
-
-	client := &DynDNSClient{
-		config: config,
-		httpClient: &http.Client{
-			Timeout: 30 * time.Second,
-		},
-		checkInterval: checkInterval,
-	}
-
-	log.Printf("MultiDDNSv6 client initialized with config: %s", configPath)
-	return client, nil
 }
 
 // loadConfig loads configuration from JSON file
@@ -261,17 +222,8 @@ func (c *DynDNSClient) checkAndUpdate() error {
 		return fmt.Errorf("failed to get IPv6 prefix: %w", err)
 	}
 
-	// Check blacklist
-	for _, blocked := range c.config.Blacklist {
-		if prefix == blocked {
-			log.Printf("IPv6 prefix %s is blacklisted, skipping update", prefix)
-			return nil
-		}
-	}
-
 	// Check if prefix has changed
 	if prefix == c.currentPrefix {
-		log.Printf("IPv6 prefix unchanged: %s", prefix)
 		return nil
 	}
 
@@ -312,19 +264,45 @@ func (c *DynDNSClient) checkAndUpdate() error {
 	return nil
 }
 
-// Run starts the MultiDDNSv6 client monitoring loop
-func (c *DynDNSClient) Run() {
-	log.Printf("Starting MultiDDNSv6 client with %d domains and %d services", len(c.config.Domains), len(c.config.Services))
-	log.Printf("Check interval: %v", c.checkInterval)
+func main() {
+	configPath := "config.json"
+	if len(os.Args) > 1 {
+		configPath = os.Args[1]
+	}
+
+	// Load configuration
+	config, err := loadConfig(configPath)
+	if err != nil {
+		log.Fatalf("Failed to load config from %q: %v", configPath, err)
+	}
+
+	// Parse check interval
+	checkInterval, err := time.ParseDuration(config.Period)
+	if err != nil {
+		log.Fatalf("Invalid period format %q: %v", config.Period, err)
+	}
+
+	// Use standard logging to stderr
+	log.SetFlags(log.LstdFlags)
+
+	client := &DynDNSClient{
+		config: config,
+		httpClient: &http.Client{
+			Timeout: 30 * time.Second,
+		},
+		checkInterval: checkInterval,
+	}
+
+	log.Printf("Starting MultiDDNSv6 client:\n - Config: %s\n - Domains: %d\n - Services: %d\n - Check interval: %v", configPath, len(client.config.Domains), len(client.config.Services), client.checkInterval)
 
 	// Initial check
-	err := c.checkAndUpdate()
+	err = client.checkAndUpdate()
 	if err != nil {
 		log.Printf("Initial check failed: %v", err)
 	}
 
 	// Set up periodic checks
-	ticker := time.NewTicker(c.checkInterval)
+	ticker := time.NewTicker(client.checkInterval)
 	defer ticker.Stop()
 
 	// Set up signal handling for graceful shutdown
@@ -334,7 +312,7 @@ func (c *DynDNSClient) Run() {
 	for {
 		select {
 		case <-ticker.C:
-			err := c.checkAndUpdate()
+			err := client.checkAndUpdate()
 			if err != nil {
 				log.Printf("Check failed: %v", err)
 			}
@@ -343,18 +321,4 @@ func (c *DynDNSClient) Run() {
 			return
 		}
 	}
-}
-
-func main() {
-	configPath := "config.json"
-	if len(os.Args) > 1 {
-		configPath = os.Args[1]
-	}
-
-	client, err := NewDynDNSClient(configPath)
-	if err != nil {
-		log.Fatalf("Failed to create DynDNS client: %v", err)
-	}
-
-	client.Run()
 }
